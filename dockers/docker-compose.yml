@@ -1,0 +1,37 @@
+version: "2.4"
+
+networks:
+  slack-bot-network:
+
+services:
+  bot-server:
+    build:
+      context: ${CONTEXT}
+      dockerfile: ${CONTEXT}/dockers/Dockerfile
+    container_name: bot-server
+    env_file:
+      - ${CONTEXT}/.env
+    ports:
+      - 8080:8080
+    networks:
+      - slack-bot-network
+    depends_on:
+      bot-db:
+        condition: service_healthy
+
+  bot-db:
+    image: mysql:5.7.21
+    container_name: bot-db
+    volumes:
+      - ${CONTEXT}/db/healthcheck:/usr/local/bin/healthcheck
+    env_file:
+      - ${CONTEXT}/.env
+    ports:
+      - 3306:3306
+    networks:
+      - slack-bot-network
+    healthcheck:
+      test: "healthcheck"
+      interval: 5s
+      timeout: 3s
+      retries: 3

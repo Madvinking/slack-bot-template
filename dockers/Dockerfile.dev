@@ -1,0 +1,15 @@
+FROM node:11.9.0-alpine
+
+#used by the bot
+EXPOSE 8080
+WORKDIR /slackbot
+
+COPY .babelrc           .babelrc
+COPY yarn.lock          yarn.lock
+COPY .prettierrc        .prettierrc
+COPY package.json       package.json
+COPY .eslintrc.json     .eslintrc.json
+
+RUN yarn
+
+CMD ["yarn", "watch"]

@@ -1,0 +1,46 @@
+{
+  // Use IntelliSense to learn about possible attributes.
+  // Hover to view descriptions of existing attributes.
+  // For more information, visit: https://go.microsoft.com/fwlink/?linkid=830387
+  "version": "0.2.0",
+  "diagnosticLogging": true,
+  "configurations": [
+    {
+      "type": "node",
+      "request": "launch",
+      "name": "Attach to Node Process",
+      "processId": "${command:PickProcess}"
+    },
+    {
+      "type": "node",
+      "request": "attach",
+      "name": "Attach to Node Process",
+      "processId": "${command:PickProcess}"
+    },
+    {
+      "type": "node",
+      "request": "launch",
+      "restart": true,
+      "sourceMaps": true,
+      "stopOnEntry": false,
+      "name": "local debug",
+      "protocol": "inspector",
+      "runtimeExecutable": "nodemon",
+      "args": ["${workspaceRoot}/src/index.mjs"],
+      "runtimeArgs": ["--inspect", "--exec", "babel-node"]
+    },
+    {
+      "type": "node",
+      "request": "attach",
+      "name": "docker debug",
+      "restart": true,
+      "sourceMaps": true,
+      "address": "127.0.0.1",
+      "localRoot": "${workspaceRoot}/",
+      "remoteRoot": "app/",
+      "port": 9229,
+      "protocol": "inspector",
+      "timeout": 200000
+    }
+  ]
+}

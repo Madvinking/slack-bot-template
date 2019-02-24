@@ -1,0 +1,62 @@
+{
+  "search.exclude": {
+    "**/node_modules": true,
+    "**/*.map": true,
+    "**/bower_components": true,
+    "**/dist": true
+  },
+  "files.exclude": {
+    "**/.git": true,
+    "**/.DS_Store": true,
+    "**/*.map": true,
+  },
+  "terminal.integrated.shell.osx": "zsh",
+  "gitlens.defaultDateFormat": "HH:mm:ss , Do MMMM YYYY",
+  "editor.formatOnPaste": true,
+  "editor.trimAutoWhitespace": true,
+  "files.autoSave": "onFocusChange",
+  "emmet.syntaxProfiles": {
+    "javascript": "jsx"
+  },
+  "window.zoomLevel": 0,
+  "editor.fontSize": 14,
+  "editor.wordWrap": "on",
+  "editor.multiCursorModifier": "ctrlCmd",
+  "eslint.validate": [
+    "javascript",
+    "javascriptreact"
+  ],
+  "javascript.validate.enable": true,
+  "git.enableSmartCommit": true,
+  "files.trimTrailingWhitespace": true,
+  "editor.tabSize": 2,
+  "diffEditor.ignoreTrimWhitespace": false,
+  "javascript.updateImportsOnFileMove.enabled": "always",
+  "docker-compose.shell": "zsh",
+  "docker.attachShellCommand.linuxContainer": "/bin/sh -c \"[ -e /bin/zsh ] && /bin/zsh || /bin/sh\"",
+  "eslint.packageManager": "npm",
+  "git.autofetch": true,
+  "window.title": "${activeEditorLong}${separator}${rootName}",
+  "editor.fontLigatures": true,
+  "editor.fontFamily": "Firicico",
+  "workbench.colorTheme": "Noctis",
+  "terminal.integrated.fontFamily": "Menlo",
+  "workbench.iconTheme": "material-icon-theme",
+  "cSpell.userWords": [
+    "Logz",
+    "botkit",
+    "kibana",
+    "logzio",
+    "nodmeon",
+    "promisify"
+  ],
+  "yarn.runInTerminal": true,
+  "npm-intellisense.importES6": true,
+  "explorer.confirmDelete": false,
+  "workbench.statusBar.feedback.visible": false,
+  "eslint.alwaysShowStatus": true,
+  // "eslint.autoFixOnSave": true
+  // "editor.formatOnSave": true,
+  "tslint.autoFixOnSave": true,
+  "typescript.suggest.completeJSDocs": false,
+}

@@ -1,0 +1,90 @@
+{
+  "name": "slack-bot-template",
+  "private": true,
+  "version": "1.0.0",
+  "description": "slack-bot-template",
+  "main": "src/index.mjs",
+  "scripts": {
+    "clean": "rm -r node_modules",
+    "start": "babel-node .",
+    "watch": "nodemon --inspect=0.0.0.0:9229 --exec babel-node src/index.mjs",
+    "build": "babel src/**/*.mjs --out-dir dist",
+    "lint": "eslint \"src/**/*.{mjs,js}\" --quiet",
+    "format": "prettier --write \"{src,__test__}/**/*.{mjs,js}\"",
+    "prod": "yarn format && yarn lint && yarn build && yarn test",
+    "docker": "docker-compose -f dockers/docker-compose.yml up",
+    "docker:dev": "docker-compose -f dockers/docker-compose-dev.yml up",
+    "lt": "node lt.js",
+    "test": "jest"
+  },
+  "husky": {
+    "hooks": {
+      "pre-commit": "yarn prod"
+    }
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/madvinking/slack-bot-template.git"
+  },
+  "keywords": [
+    "slack",
+    "bot"
+  ],
+  "author": "nir winkler <madvinking@gmail.com>",
+  "license": "Apache-2.0",
+  "bugs": {
+    "url": "https://github.com/madvinking/slack-bot-template/issues"
+  },
+  "jest": {
+    "verbose": true,
+    "transform": {
+      "^.+\\.mjs$": "babel-jest",
+      "^.+\\.js$": "babel-jest"
+    },
+    "moduleFileExtensions": [
+      "mjs",
+      "js"
+    ],
+    "testMatch": [
+      "**/__tests__/**/*.?(m)js?(x)",
+      "**/?(*.)(spec|test).?(m)js?(x)"
+    ]
+  },
+  "homepage": "https://github.com/madvinking/node-babel-eslint-prettier-jest-template#readme",
+  "devDependencies": {
+    "@babel/cli": "^7.2.3",
+    "@babel/core": "^7.3.3",
+    "@babel/node": "^7.2.2",
+    "@babel/plugin-proposal-class-properties": "^7.3.3",
+    "@babel/plugin-syntax-dynamic-import": "^7.2.0",
+    "@babel/plugin-transform-modules-commonjs": "^7.2.0",
+    "@babel/plugin-transform-runtime": "^7.2.0",
+    "@babel/preset-env": "^7.3.1",
+    "babel-eslint": "^10.0.1",
+    "babel-jest": "^24.1.0",
+    "eslint": "^5.14.1",
+    "eslint-config-prettier": "^4.0.0",
+    "eslint-plugin-import": "^2.16.0",
+    "eslint-plugin-jest": "^22.3.0",
+    "husky": "^1.3.1",
+    "jest": "^24.1.0",
+    "jest-cli": "^24.1.0",
+    "localtunnel": "^1.9.1",
+    "nodemon": "^1.18.10",
+    "prettier": "^1.16.4",
+    "winston": "^3.2.1",
+    "winston-logzio": "^4.0.1"
+  },
+  "dependencies": {
+    "@babel/runtime": "^7.3.1",
+    "@slack/client": "^4.9.0",
+    "@slack/events-api": "^2.1.1",
+    "@slack/interactive-messages": "^1.0.2",
+    "body-parser": "^1.18.3",
+    "dotenv": "^6.2.0",
+    "express": "^4.16.4",
+    "mysql": "^2.16.0",
+    "query-string": "^6.2.0",
+    "sql-template-strings": "^2.2.2"
+  }
+}
