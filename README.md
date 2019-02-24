@@ -1,4 +1,11 @@
-# template for building a slack bot using slackApi
+
+![what a BOT !][logo]
+
+[logo]: https://cdn3.iconfinder.com/data/icons/robots-flat-collection/60/Robots_-_Flat_-_018_-_Bot-128.png
+
+work in progress
+
+# template for building slack bot using slackApi
 
   - mysql DB for bot support (add/get/remove) teams, channels and users
   - Dockerfile for dev and prod environments
@@ -36,14 +43,6 @@ yarn docker
  - fix docker files
  - localtunnel to restart when crashing
 
-License
-----
-MIT
+
 
 **Free Software, Hell Yeah!**
-
-
-![what a BOT !][logo]
-
-[logo]: https://cdn.iconscout.com/icon/free/png-256/bot-136-504893.png
-
