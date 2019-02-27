@@ -1,6 +1,6 @@
 import express from 'express';
 import { getLogger } from '../config/index';
-// import { urlencoded, json } from 'body-parser';
+import { urlencoded, json } from 'body-parser';
 import { createEventAdapter } from '@slack/events-api';
 import { createMessageAdapter } from '@slack/interactive-messages';
 
@@ -9,16 +9,19 @@ export function ListenToAPI({
   port,
   slackSecret,
   controllers: {
+    loginTeam,
+    oauthTeam,
+    afterOauth,
     handleSlash,
     handleButton,
     handledMessage,
-    addNewWorkspace,
     handleDialogSubmission
   }
 }) {
   const app = express();
+  app.use(urlencoded({ extended: false }));
+  app.use(json());
   const defaultUrl = 'https://myhomepage.io';
-  const redirectUrl = 'https://myhomepage.io/bot-confirm/';
   const slackEvents = createEventAdapter(slackSecret);
   const slackInteractions = createMessageAdapter(slackSecret);
 
@@ -27,48 +30,41 @@ export function ListenToAPI({
   app.use('/interactive', slackInteractions.expressMiddleware());
 
   // list of event and the controller that each use
+
   const events = [
-    { event: 'message', controller: handledMessage },
-    { event: 'app_mention', controller: handledMessage },
-    { event: 'create_bot', controller: addNewWorkspace },
-    { event: 'scope_granted', controller: addNewWorkspace },
-    { event: 'error', controller: err => logger.error('error from event', err) }
+    { event: 'message', ctr: handledMessage },
+    { event: 'app_mention', ctr: handledMessage },
+    { event: 'error', ctr: err => logger.error('error from event', err) }
   ];
   // sign the controller to the event
-  events.forEach(({ event, controller }) => slackEvents.on(event, controller));
+  events.forEach(({ event, ctr }) => slackEvents.on(event, ctr));
 
   // list of interactions and the controller that each use
   const interactions = [
-    { action: 'welcome_button', controller: handleButton },
+    { action: 'welcome_button', ctr: handleButton },
     {
       action: { type: 'button' },
-      controller: handleButton
+      ctr: handleButton
     },
     {
       action: { type: 'dialog_submission' },
-      controller: handleDialogSubmission
+      ctr: handleDialogSubmission
     },
     {
       action: 'error',
-      controller: err => logger.error('error from interaction', err)
+      ctr: err => logger.error('error from interaction', err)
     }
   ];
 
   // sign the controller to the interaction
-  interactions.forEach(({ action, controller }) =>
-    slackInteractions.action(action, controller)
+  interactions.forEach(({ action, ctr }) =>
+    slackInteractions.action(action, ctr)
   );
 
   // configure rest api
-  // app.use(urlencoded({ extended: false }));
-  // app.use(json());
-
+  app.get('/login', loginTeam);
+  app.get('/oauth', oauthTeam);
   app.post('/slash', handleSlash);
-
-  app.get('/oauth', (req, res) => {
-    // addNewWorkspace(req);
-    res.redirect(redirectUrl);
-  });
   app.get('/*', (req, res) => res.send(defaultUrl));
   app.listen(port, () => logger.info(`app listening on port ${port}`));
 

@@ -10,7 +10,8 @@ export class Bot {
     //webClient is for sending users messages data and etc...
     const {
       chat: { postMessage },
-      dialog: { open: openDialog }
+      dialog: { open: openDialog },
+      oauth: { access: getAccessToken }
     } = new WebClient(slackToken);
 
     // initiation controllers with the response function
@@ -19,7 +20,8 @@ export class Bot {
       db,
       slackToken,
       openDialog,
-      postMessage
+      postMessage,
+      getAccessToken
     });
 
     logger.info('initiation routes');

@@ -41,12 +41,12 @@ function saveUserFactory(tableName) {
   }) {
     const sql = SQL`INSERT into `
       .append(tableName)
-      .append(SQL` (id, name, scopes, team_id, real_name, access_token)`)
+      .append(SQL` (name, scopes, id, real_name, access_token)`)
       .append(
-        SQL`VALUES (${id}, ${name}, ${scopes}, ${team_id}, ${real_name}, ${access_token})`
+        SQL`VALUES (${name}, ${scopes}, ${id}, ${real_name}, ${access_token})`
       )
       .append(
-        SQL`ON DUPLICATE KEY UPDATE name=${name}, scopes=${scopes}, team_id=${team_id}, real_name=${real_name}, access_token=${access_token}`
+        SQL`ON DUPLICATE KEY UPDATE name=${name}, scopes=${scopes}, id=${id}, real_name=${real_name}, access_token=${access_token}`
       );
     const { affectedRows } = await query(sql);
     return Boolean(affectedRows);
@@ -54,26 +54,13 @@ function saveUserFactory(tableName) {
 }
 
 function saveTeamFactory(tableName) {
-  return function saveTeam({
-    id,
-    name,
-    domain,
-    email_domain,
-    enterprise_id,
-    enterprise_name,
-    createdBy,
-    token
-  }) {
+  return function saveTeam({ team_id, team_name, access_token, scope }) {
     const sql = SQL`INSERT into `
       .append(tableName)
+      .append(SQL` (team_id, team_name, access_token, scope)`)
+      .append(SQL`VALUES (${team_id}, ${team_name}, ${access_token}, ${scope})`)
       .append(
-        SQL` (id, name, domain, email_domain, enterprise_id, enterprise_name, createdBy, token)`
-      )
-      .append(
-        SQL`VALUES (${id}, ${name}, ${domain}, ${email_domain}, ${enterprise_id}, ${enterprise_name}, ${createdBy}, ${token})`
-      )
-      .append(
-        SQL`ON DUPLICATE KEY UPDATE name = ${name}, domain = ${domain}, email_domain = ${email_domain}, enterprise_id = ${enterprise_id}, enterprise_name = ${enterprise_name}, createdBy = ${createdBy}, token = ${token}`
+        SQL`ON DUPLICATE KEY UPDATE team_name = ${team_name}, access_token = ${access_token}, scope = ${scope}`
       );
     return query(sql);
   };

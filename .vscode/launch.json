@@ -5,12 +5,7 @@
   "version": "0.2.0",
   "diagnosticLogging": true,
   "configurations": [
-    {
-      "type": "node",
-      "request": "launch",
-      "name": "Attach to Node Process",
-      "processId": "${command:PickProcess}"
-    },
+
     {
       "type": "node",
       "request": "attach",

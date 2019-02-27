@@ -27,7 +27,7 @@ async function init() {
   };
 
   const db = await DB(dbConfig);
-  // new Bot({ name, port, slackToken, slackSecret, db });
+  new Bot({ name, port, slackToken, slackSecret, db });
 }
 
 init();
