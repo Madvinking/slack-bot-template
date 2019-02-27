@@ -3,34 +3,59 @@ const { promisify } = require('util');
 const localtunnel = promisify(require('localtunnel'));
 const { PORT: port, LOCAL_SUB_DOMAIN: subdomain } = process.env;
 
+let interval = 5
+let timeToWait = 2;
+
+
+//each time a restart is called it will increase the time to wait by 1 sec
+// after 5 times it will return to 2 second
 async function time(time) {
-  return new Promise(resolve => {
-    setTimeout(() => resolve(), time * 1000);
+  return await new Promise(resolve => {
+    setTimeout(() =>  {
+      timeToWait++;
+      interval--;
+      if (!interval) {
+        interval = 5;
+        timeToWait = 2;
+      }
+      resolve();
+    }, time * 1000);
   });
 }
 
-async function init() {
-  async function closeTunnel() {
-    try {
-      await time(5);
-      console.log('restarting tunnel');
-      init();
-    } catch (err) {
-      console.log('TCL: }catch -> err', err);
-    }
-  }
-
+async function closeTunnel() {
   try {
-    const tunnel = await localtunnel(port, { subdomain });
-    const { url } = tunnel;
-    if (!url.includes(subdomain)) await closeTunnel();
-    console.log(`tunnel opend host: ${url}`);
-    tunnel.on('close', closeTunnel);
-    tunnel.on('error', closeTunnel);
+    console.log(`restarting tunnel in ${timeToWait} seconds`);
+    const result = await time(timeToWait);
+    return start(result);
   } catch (err) {
-    console.log('err', err);
-    await closeTunnel();
+    console.log('closeTunnel - err: ', err);
   }
 }
 
-init();
+
+let singleListener = false;
+async function start() {
+  let tunnel;
+  try {
+    tunnel = await localtunnel(port, { subdomain });
+    if (singleListener) {
+      singleListener = false;
+      tunnel.on('close', closeTunnel);
+      tunnel.on('error', closeTunnel);
+    }
+    const { url } = tunnel;
+    console.log(`tunnel opened host: ${url}`);
+    if (!url.includes(subdomain)) throw Error(`not the right subdomain ${url}`);
+  } catch (err) {
+    console.log('err', err.message);
+    if (tunnel) {
+      tunnel.close();
+    } else {
+      closeTunnel();
+    }
+
+  }
+}
+
+start();

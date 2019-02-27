@@ -19,20 +19,37 @@ services:
       - 8080:8080
       - 9229:9229
     networks:
-      bot-network
+      - bot-network
     depends_on:
-      bot-db:
-        condition: service_healthy
+      - bot-tunnel
+      - bot-db
+
+  bot-tunnel:
+    image: node:11.10.0-alpine
+    container_name: bot-tunnel
+    working_dir: /src
+    command: npm run lt
+    ports:
+      - 443:443
+      - 80:80
+    volumes:
+      - ${CONTEXT}/:/src
+    env_file:
+      - ${CONTEXT}/.env
+    networks:
+      - bot-network
 
   bot-db:
     image: mysql:5.7.21
     container_name: bot-db
+    env_file:
+      - ${CONTEXT}/.env
     volumes:
       - ${CONTEXT}/db/healthcheck:/usr/local/bin/healthcheck
     ports:
-      - 3306:3306
+      - 3308:3306
     networks:
-      bot-network
+      - bot-network
     healthcheck:
       test: 'healthcheck'
       interval: 5s

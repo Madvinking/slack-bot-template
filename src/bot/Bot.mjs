@@ -1,14 +1,12 @@
 import { ListenToAPI } from './routes';
 import { WebClient } from '@slack/client';
-import { getLogger, DB } from '../config/index';
+import { getLogger } from '../config/index';
 import { Controllers } from './controllers';
 
 const logger = getLogger(__filename);
 export class Bot {
-  constructor({ name, port, slackToken, slackSecret, dbConfig }) {
+  constructor({ name, port, slackToken, slackSecret, db }) {
     this.name = name;
-    const db = DB(dbConfig);
-
     //webClient is for sending users messages data and etc...
     const {
       chat: { postMessage },
@@ -18,10 +16,10 @@ export class Bot {
     // initiation controllers with the response function
     logger.info('initiation controllers');
     const controllers = Controllers({
-      postMessage,
       db,
+      slackToken,
       openDialog,
-      slackToken
+      postMessage
     });
 
     logger.info('initiation routes');

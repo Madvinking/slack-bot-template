@@ -1,10 +1,10 @@
 import { createPool } from 'mysql';
 import SQL from 'sql-template-strings';
+import { userTable, teamTable, channelTable } from './Tables';
 
 let pool;
-
 // convert mysql pool and query callback to promise
-const query = function makeQuery(sql) {
+function query(sql) {
   return new Promise((resolve, reject) => {
     pool.getConnection((err, connection) => {
       if (err) reject(err); // not connected!
@@ -15,141 +15,124 @@ const query = function makeQuery(sql) {
       });
     });
   });
-};
+}
 
-const getFactory = function(tableName, translator) {
-  return async function getById(id) {
+function getFactory(tableName) {
+  return async function getById(id = null) {
+    if (!id) throw Error('must provide id');
     const sql = SQL`SELECT * from `
       .append(tableName)
-      .append(SQL` where id = ${id}`);
+      .append(SQL` where id = ${id} `)
+      .append(`LIMIT 1`);
 
-    const [user] = await query(sql);
-    return translator(user);
+    const [result] = await query(sql);
+    if (!result) throw Error(`can't find ${id} in ${tableName}`);
+    return result;
   };
-};
-
-const saveUserFactory = function(tableName) {
-  return function saveUser({
+}
+function saveUserFactory(tableName) {
+  return async function saveUser({
     id,
-    access_token,
-    scopes: scopesObj,
-    team,
-    user
+    name,
+    scopes,
+    team_id,
+    real_name,
+    access_token
   }) {
-    const scopes = JSON.stringify(scopesObj);
-
     const sql = SQL`INSERT into `
       .append(tableName)
-      .append(SQL` (id, access_token, scopes, team, user)`)
-      .append(SQL`VALUES (${id}, ${access_token}, ${scopes}, ${team}, ${user})`)
+      .append(SQL` (id, name, scopes, team_id, real_name, access_token)`)
       .append(
-        SQL`ON DUPLICATE KEY UPDATE id=${id}, access_token=${access_token}, scopes=${scopes}, team=${team}, user=${user}`
-      );
-
-    return query(sql);
-  };
-};
-
-const saveTeamFactory = function(tableName) {
-  return function saveTeam({ id, createdBy, name, url, token, bot: botObj }) {
-    const bot = JSON.stringify(botObj);
-    const sql = SQL`INSERT into `
-      .append(tableName)
-      .append(SQL` (id, createdBy, name, url, token, bot)`)
-      .append(
-        SQL`VALUES (${id}, ${createdBy}, ${name}, ${url}, ${token}, ${bot})`
+        SQL`VALUES (${id}, ${name}, ${scopes}, ${team_id}, ${real_name}, ${access_token})`
       )
       .append(
-        SQL`ON DUPLICATE KEY UPDATE createdBy = ${createdBy}, name = ${name}, url = ${url}, token = ${token}, bot = ${bot}`
+        SQL`ON DUPLICATE KEY UPDATE name=${name}, scopes=${scopes}, team_id=${team_id}, real_name=${real_name}, access_token=${access_token}`
       );
-    return query(sql);
+    const { affectedRows } = await query(sql);
+    return Boolean(affectedRows);
   };
-};
+}
 
-const saveAccountFactory = function(tableName) {
-  return function saveAccount({ team, id, alias, user }) {
-    const sql = SQL`INSERT into `
-      .append(tableName)
-      .append(SQL` (team, id, alias, user)`)
-      .append(SQL`VALUES (${team}, ${id}, ${alias}, ${user})`)
-      .append(
-        SQL`ON DUPLICATE KEY UPDATE team = ${team}, id = ${id}, alias = ${alias}, user = ${user}`
-      );
-    return query(sql);
-  };
-};
-
-const saveChannelFactory = function(tableName) {
-  return function saveChannel({ id, ...rest }) {
-    const stringifiedJson = JSON.stringify(rest);
-    const sql = SQL`INSERT into `
-      .append(tableName)
-      .append(SQL` (id, json)`)
-      .append(SQL`VALUES (${id}, ${stringifiedJson})`)
-      .append(SQL`ON DUPLICATE KEY UPDATE json=${stringifiedJson}`);
-    return query(sql);
-  };
-};
-
-const fetchAllFactory = function(tableName, translator) {
-  return async function fetchAll() {
-    const sql = SQL`SELECT * from `.append(tableName);
-    const { rows } = await query(sql);
-    const translatedData = rows.map(translator);
-    return translatedData;
-  };
-};
-
-const dbToUserJson = function({ scopes, ...rest }) {
-  return {
-    ...rest,
-    ...(scopes ? { scopes: JSON.parse(scopes) } : {}) //if host exist it will add it
-  };
-};
-
-const dbToTeamJson = function({ bot, ...rest }) {
-  return {
-    ...rest,
-    ...(bot ? { bot: JSON.parse(bot) } : {}) //if host exist it will add it
-  };
-};
-
-const dbToChannelJson = function({ id, json }) {
-  return {
+function saveTeamFactory(tableName) {
+  return function saveTeam({
     id,
-    ...JSON.parse(json)
+    name,
+    domain,
+    email_domain,
+    enterprise_id,
+    enterprise_name,
+    createdBy,
+    token
+  }) {
+    const sql = SQL`INSERT into `
+      .append(tableName)
+      .append(
+        SQL` (id, name, domain, email_domain, enterprise_id, enterprise_name, createdBy, token)`
+      )
+      .append(
+        SQL`VALUES (${id}, ${name}, ${domain}, ${email_domain}, ${enterprise_id}, ${enterprise_name}, ${createdBy}, ${token})`
+      )
+      .append(
+        SQL`ON DUPLICATE KEY UPDATE name = ${name}, domain = ${domain}, email_domain = ${email_domain}, enterprise_id = ${enterprise_id}, enterprise_name = ${enterprise_name}, createdBy = ${createdBy}, token = ${token}`
+      );
+    return query(sql);
   };
-};
+}
 
-export function DB({ host, connectionLimit = 10, ...rest }) {
+function saveChannelFactory(tableName) {
+  return function saveChannel({ id, name, creator, team_id }) {
+    const sql = SQL`INSERT into `
+      .append(tableName)
+      .append(SQL` (id, name, creator, team_id)`)
+      .append(SQL`VALUES (${id}, ${name}, ${creator}, ${team_id})`)
+      .append(
+        SQL`ON DUPLICATE KEY UPDATE name = ${name}, creator = ${creator}, team_id = ${team_id}`
+      );
+    return query(sql);
+  };
+}
+
+function fetchAllFactory(tableName) {
+  return function fetchAll() {
+    const sql = SQL`SELECT * from `.append(tableName);
+    return query(sql);
+  };
+}
+
+export async function DB({
+  host,
+  connectionLimit = 10,
+  database = null,
+  ...rest
+}) {
   if (!host) throw new Error('Need to provide MySQL connection information.');
 
-  pool = createPool({
+  pool = await createPool({
     host,
     connectionLimit,
+    ...(database ? { database } : {}),
     ...rest
   });
+  if (database) await query(`CREATE DATABASE IF NOT EXISTS ${database}`);
+  await query(userTable);
+  await query(teamTable);
+  await query(channelTable);
 
   return {
     teams: {
-      get: getFactory('team', dbToTeamJson),
+      get: getFactory('team'),
       save: saveTeamFactory('team'),
-      all: fetchAllFactory('team', dbToTeamJson)
+      all: fetchAllFactory('team')
     },
     channels: {
-      get: getFactory('channel', dbToChannelJson),
+      get: getFactory('channel'),
       save: saveChannelFactory('channel'),
-      all: fetchAllFactory('channel', dbToChannelJson)
+      all: fetchAllFactory('channel')
     },
     users: {
-      get: getFactory('user', dbToUserJson),
+      get: getFactory('user'),
       save: saveUserFactory('user'),
-      all: fetchAllFactory('user', dbToUserJson)
-    },
-    account: {
-      get: getFactory('account', dbToUserJson),
-      save: saveAccountFactory('account'),
-      all: fetchAllFactory('account', dbToUserJson)
+      all: fetchAllFactory('user')
     }
   };
 }

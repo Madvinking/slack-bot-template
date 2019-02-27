@@ -37,10 +37,10 @@
       "sourceMaps": true,
       "address": "127.0.0.1",
       "localRoot": "${workspaceRoot}/",
-      "remoteRoot": "app/",
+      "remoteRoot": "slackbot/",
       "port": 9229,
       "protocol": "inspector",
-      "timeout": 200000
+      "timeout": 200000,
     }
   ]
 }

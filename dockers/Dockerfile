@@ -1,4 +1,4 @@
-FROM node:11.9.0-alpine
+FROM node:11.10.0-alpine
 
 #used by the bot
 EXPOSE 8080

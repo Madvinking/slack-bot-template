@@ -9,12 +9,12 @@
     "start": "babel-node .",
     "watch": "nodemon --inspect=0.0.0.0:9229 --exec babel-node src/index.mjs",
     "build": "babel src/**/*.mjs --out-dir dist",
-    "lint": "eslint \"src/**/*.{mjs,js}\" --quiet",
+    "lint": "eslint \"{src,__test__}/**/*.{mjs,js}\" --quiet",
     "format": "prettier --write \"{src,__test__}/**/*.{mjs,js}\"",
     "prod": "yarn format && yarn lint && yarn build && yarn test",
     "docker": "docker-compose -f dockers/docker-compose.yml up",
     "docker:dev": "docker-compose -f dockers/docker-compose-dev.yml up",
-    "lt": "node lt.js",
+    "lt": "node scripts/lt.js",
     "test": "jest"
   },
   "husky": {

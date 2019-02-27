@@ -1,10 +1,11 @@
-FROM node:11.9.0-alpine
-
+FROM node:11.10.0-alpine
+env PORT 8080
 #used by the bot
-EXPOSE 8080
+EXPOSE ${PORT}
 EXPOSE 9229
 WORKDIR /slackbot
 
+COPY .env               .env
 COPY .babelrc           .babelrc
 COPY yarn.lock          yarn.lock
 COPY .prettierrc        .prettierrc
